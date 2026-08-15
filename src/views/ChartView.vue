@@ -3,6 +3,7 @@ import { ref, onMounted, onBeforeUnmount } from "vue";
 import * as echarts from "echarts";
 import * as api from "../lib/api";
 import { getSkin, applySkin } from "../skins";
+import { applyGlassWindowEffect } from "../lib/windowEffects";
 
 type Range = "24h" | "7d" | "all";
 
@@ -175,6 +176,7 @@ function refresh() {
 }
 
 onMounted(() => {
+  void applyGlassWindowEffect();
   load();
   window.addEventListener("resize", onResize);
 });
@@ -192,22 +194,35 @@ function onResize() {
 
 <template>
   <div class="chart-page">
-    <div class="toolbar">
-      <div class="seg">
-        <button
-          v-for="r in ranges"
-          :key="r.id"
-          class="seg-btn"
-          :class="{ active: range === r.id }"
-          @click="setRange(r.id)"
-        >
-          {{ r.label }}
-        </button>
+    <div class="chart-shell">
+      <header class="toolbar">
+        <div class="chart-title">
+          <h1>余额趋势</h1>
+          <p>用量与充值记录会在每次刷新后自动沉淀</p>
+        </div>
+        <div class="toolbar-actions">
+          <div class="seg" aria-label="时间范围">
+            <button
+              v-for="r in ranges"
+              :key="r.id"
+              class="seg-btn"
+              :class="{ active: range === r.id }"
+              @click="setRange(r.id)"
+            >
+              {{ r.label }}
+            </button>
+          </div>
+          <button class="refresh" @click="refresh" aria-label="刷新曲线数据">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8.1 8.1 0 00-15.5-2.8L3 10"/><path d="M3 4v6h6"/><path d="M4 13a8.1 8.1 0 0015.5 2.8L21 14"/><path d="M21 20v-6h-6"/></svg>
+            刷新
+          </button>
+        </div>
+      </header>
+      <div class="chart-area">
+        <div class="hint" v-if="emptyMsg">{{ emptyMsg }}</div>
+        <div ref="chartEl" class="chart" :style="{ display: emptyMsg ? 'none' : 'block' }"></div>
       </div>
-      <button class="refresh" @click="refresh">⟳ 刷新</button>
     </div>
-    <div class="hint" v-if="emptyMsg">{{ emptyMsg }}</div>
-    <div ref="chartEl" class="chart" :style="{ display: emptyMsg ? 'none' : 'block' }"></div>
   </div>
 </template>
 
@@ -215,47 +230,117 @@ function onResize() {
 .chart-page {
   width: 100%;
   height: 100%;
+  padding: 18px;
+  background:
+    radial-gradient(circle at 7% 0%, color-mix(in srgb, var(--skin-accent) 23%, transparent), transparent 30%),
+    radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--skin-bg) 72%, var(--skin-accent)), transparent 42%),
+    transparent;
+}
+
+.chart-shell {
+  width: 100%;
+  height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 12px 16px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--glass-stroke) 85%, transparent);
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #ffffff 34%, transparent), transparent 29%),
+    var(--glass-fill-strong);
+  box-shadow: 0 18px 48px var(--glass-shadow), inset 0 1px 0 color-mix(in srgb, #ffffff 72%, transparent);
+  backdrop-filter: blur(22px) saturate(1.16);
+  -webkit-backdrop-filter: blur(22px) saturate(1.16);
 }
 
 .toolbar {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  margin-bottom: 8px;
+  gap: 18px;
+  padding: 20px 22px 16px;
+  border-bottom: 1px solid color-mix(in srgb, var(--skin-border) 56%, transparent);
+}
+
+.chart-title h1 {
+  font-size: 18px;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  font-weight: 740;
+}
+
+.chart-title p {
+  margin-top: 5px;
+  color: var(--skin-subtext);
+  font-size: 12px;
+}
+
+.toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .seg {
   display: flex;
-  background: color-mix(in srgb, var(--skin-subtext) 12%, transparent);
-  border-radius: 8px;
   padding: 3px;
-  gap: 2px;
+  gap: 3px;
+  border: 1px solid color-mix(in srgb, var(--skin-border) 58%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--skin-card) 24%, transparent);
 }
 
 .seg-btn {
-  border: none;
+  border: 1px solid transparent;
   background: transparent;
   color: var(--skin-subtext);
   font-size: 12px;
-  padding: 5px 12px;
-  border-radius: 6px;
-  transition: all 0.15s;
+  font-weight: 600;
+  padding: 6px 11px;
+  border-radius: 7px;
+  transition: background 160ms ease, color 160ms ease, box-shadow 160ms ease;
 }
 .seg-btn.active {
-  background: var(--skin-accent);
+  background: color-mix(in srgb, var(--skin-accent) 88%, var(--skin-card));
   color: #fff;
+  box-shadow: 0 4px 11px color-mix(in srgb, var(--skin-accent) 28%, transparent);
 }
 
 .refresh {
-  border: 1px solid var(--skin-border);
-  background: var(--skin-card);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid color-mix(in srgb, var(--skin-border) 76%, transparent);
+  background: color-mix(in srgb, var(--skin-card) 38%, transparent);
   color: var(--skin-text);
   font-size: 12px;
-  padding: 5px 12px;
-  border-radius: 8px;
+  font-weight: 600;
+  padding: 7px 11px;
+  border-radius: 9px;
+  transition: transform 160ms ease, background 160ms ease;
+}
+
+.refresh:hover {
+  background: color-mix(in srgb, var(--skin-card) 64%, transparent);
+  transform: translateY(-1px);
+}
+
+.refresh svg {
+  width: 14px;
+  height: 14px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart-area {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  padding: 4px 12px 12px;
 }
 
 .hint {
@@ -265,10 +350,21 @@ function onResize() {
   justify-content: center;
   color: var(--skin-subtext);
   font-size: 13px;
+  text-align: center;
+  padding: 32px;
 }
 
 .chart {
   flex: 1;
   min-height: 0;
+}
+
+@media (max-width: 620px) {
+  .chart-page { padding: 10px; }
+  .toolbar { padding: 16px; }
+  .toolbar-actions { gap: 7px; }
+  .chart-title p { display: none; }
+  .seg-btn { padding-inline: 8px; }
+  .refresh { padding-inline: 9px; }
 }
 </style>

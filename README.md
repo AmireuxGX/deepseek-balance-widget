@@ -2,11 +2,12 @@
 
 # 💰 DeepSeek 余额悬浮窗
 
-> **实时感受花钱如流水 —— DeepSeek API 余额 & 用量悬浮小插件**
+> **始终看得见的 DeepSeek API 余额与用量趋势**
 
-基于 **Tauri 2 + Vue 3 + ECharts** 构建的半透明置顶悬浮窗，定时查询 DeepSeek API 余额，用实时曲线记录每一分钱的流逝。
+基于 **Tauri 2 + Vue 3 + ECharts** 构建的 Windows 桌面悬浮窗。它会定时查询 DeepSeek API 余额，在桌面上持续显示余额状态，并用本地历史曲线记录用量变化。
 
 [![Release](https://img.shields.io/github/v/release/AmireuxGX/deepseek-balance-widget?style=flat-square)](https://github.com/AmireuxGX/deepseek-balance-widget/releases/latest)
+[![Version](https://img.shields.io/badge/version-v0.3.0-4d6bfe?style=flat-square)](https://github.com/AmireuxGX/deepseek-balance-widget/releases/tag/v0.3.0)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 [![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-blue.svg?style=flat-square)](https://github.com/AmireuxGX/deepseek-balance-widget/releases/latest)
 [![Tauri](https://img.shields.io/badge/Tauri-2-24C8D8?style=flat-square)](https://tauri.app)
@@ -17,11 +18,20 @@
 
 ## 📸 预览
 
-![DeepSeek 余额悬浮窗](docs/screenshot.png)
+![DeepSeek 余额悬浮窗 v0.3.0](docs/screenshot-v0.3.0.jpg)
+
+## 🆕 v0.3.0 更新
+
+- **全新毛玻璃界面**：重构主悬浮窗、余额曲线和设置窗口，统一半透明材质、边缘高光、层次阴影与控件状态
+- **Windows 材质适配**：Windows 11 的常规窗口优先使用 Mica；不支持时自动回退到 CSS 玻璃效果
+- **透明主窗口修复**：主悬浮窗使用透明原生窗口与圆角 CSS 表面，消除原生矩形底板和阴影裁切方框
+- **可读性增强**：为玻璃底色设置最低可读强度，强化副文字、状态信息与操作图标在明暗背景下的对比度
+- **交互与无障碍改进**：补充键盘焦点、按钮语义、减少动态效果偏好和更清晰的加载状态
+- **版本统一**：前端、Rust、Tauri 配置和构建产物统一升级至 `0.3.0`
 
 ## ✨ 特性
 
-- 🪟 **半透明圆角悬浮卡片**：置顶显示、不占任务栏，CSS 圆角 + WebView2 硬件渲染，边缘天然抗锯齿无毛边
+- 🪟 **毛玻璃圆角悬浮卡片**：置顶显示、不占任务栏，透明原生窗口 + CSS 玻璃材质，兼顾质感、性能与兼容性
 - ⏱️ **定时查询余额**：总余额 / 充值 / 赠送 / 可用状态一屏尽览，涨跌提示（↑ ↓）+ 千分位显示 + 相对更新时间
 - 📈 **余额使用曲线**：本地自动记录快照，自动识别充值事件，ECharts 折线图 + 充值标记，支持 **24 小时 / 7 天 / 全部** 时间范围切换 —— 看着曲线往下走，花钱如流水
 - 🎨 **自定义皮肤**：7 套预设皮肤 + 6 色自定义，设置窗口实时预览
@@ -32,11 +42,11 @@
 
 ## ⬇️ 下载安装
 
-前往 **[Releases](https://github.com/AmireuxGX/deepseek-balance-widget/releases/latest)** 页面下载：
+前往 **[最新版本下载页](https://github.com/AmireuxGX/deepseek-balance-widget/releases/latest)**：
 
 | 文件 | 说明 |
 | --- | --- |
-| `DeepSeekBalanceWidget_<版本>_x64-setup.exe` | NSIS 安装包（推荐，安装到当前用户） |
+| `DeepSeekBalanceWidget_0.3.0_x64-setup.exe` | NSIS 安装包（推荐，安装到当前用户） |
 | `deepseek-balance-widget.exe` | 便携版（免安装，直接运行） |
 
 > 需要 **Windows 10 / 11**（自带 WebView2 Runtime）。
@@ -60,6 +70,13 @@
 | 托盘右键 | 显示 / 退出 |
 
 **设置窗口**可修改：API Key、刷新间隔（默认 5 分钟）、不透明度、主题皮肤（含自定义颜色）、开机自启、清空历史。
+
+## 🪟 显示与兼容性
+
+- 主悬浮窗不会对整个原生窗口启用 Mica，避免圆角外出现矩形底板；玻璃质感由透明 WebView 与 CSS 材质共同完成
+- 曲线与设置窗口在 Windows 11 上优先使用 Mica，在 Windows 10 或效果不可用时自动使用 CSS 回退
+- 不透明度较低时会保留必要的底色强度，避免文字在复杂或纯白壁纸上失去对比度
+- 更新后若仍显示旧界面，请先从系统托盘退出旧实例，再启动新版本
 
 ## 🛠️ 开发环境
 
@@ -94,7 +111,7 @@ src-tauri/target/release/bundle/nsis/*-setup.exe          # NSIS 安装包
 deepseek-balance-widget/
 ├── src/                    # Vue 3 前端
 │   ├── views/              # MainCard / ChartView / SettingsView
-│   ├── lib/api.ts          # invoke 封装与类型
+│   ├── lib/                # invoke 封装、类型与窗口材质适配
 │   ├── skins.ts            # 皮肤预设与应用
 │   └── styles.css          # 皮肤 CSS 变量与全局样式
 ├── src-tauri/              # Rust 后端

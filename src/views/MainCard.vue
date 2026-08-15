@@ -4,6 +4,7 @@ import { getCurrentWindow, LogicalSize } from "@tauri-apps/api/window";
 import { listen } from "@tauri-apps/api/event";
 import * as api from "../lib/api";
 import { getSkin, applySkin, applyOpacity } from "../skins";
+import { applyGlassWindowEffect } from "../lib/windowEffects";
 
 const appWindow = getCurrentWindow();
 
@@ -146,6 +147,7 @@ function cancelPreview() {
 }
 
 onMounted(async () => {
+  void applyGlassWindowEffect();
   await init();
   unlisten = await listen("config-changed", () => {
     reloadConfig();
@@ -225,16 +227,16 @@ function onDoubleClick() {
           <span class="dot" :class="dotClass"></span>
           <span class="title">DeepSeek 余额</span>
           <div class="actions">
-            <button class="btn" title="余额曲线" @click="api.openChart()" @dblclick.stop>
+            <button class="btn" title="余额曲线" aria-label="查看余额曲线" @click="api.openChart()" @dblclick.stop>
               <svg viewBox="0 0 24 24"><path d="M3 3v18h18" /><path d="M7 14l4-4 3 3 5-6" /></svg>
             </button>
-            <button class="btn" title="设置" @click="api.openSettings()" @dblclick.stop>
+            <button class="btn" title="设置" aria-label="打开设置" @click="api.openSettings()" @dblclick.stop>
               <svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 100-6 3 3 0 000 6z" /><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h0a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h0a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v0a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z" /></svg>
             </button>
-            <button class="btn" title="立即刷新" @click="refresh" @dblclick.stop>
+            <button class="btn" title="立即刷新" aria-label="立即刷新余额" @click="refresh" @dblclick.stop>
               <svg viewBox="0 0 24 24"><path d="M23 4v6h-6" /><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10" /></svg>
             </button>
-            <button class="btn btn-close" title="隐藏到托盘" @click="appWindow.hide()" @dblclick.stop>
+            <button class="btn btn-close" title="隐藏到托盘" aria-label="隐藏到托盘" @click="appWindow.hide()" @dblclick.stop>
               <svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12" /></svg>
             </button>
           </div>
@@ -268,28 +270,63 @@ function onDoubleClick() {
   position: relative;
   width: 100%;
   height: 100%;
-  padding: clamp(10px, 4vw, 24px);
+  padding: clamp(8px, 3vw, 18px);
 }
 
 .card {
   position: relative;
   width: 100%;
   height: 100%;
-  border-radius: clamp(14px, 5vw, 26px);
-  background: color-mix(in srgb, var(--skin-card) calc(var(--opacity) * 100%), transparent);
-  box-shadow: 0 clamp(4px, 1.6vw, 12px) clamp(12px, 4.5vw, 34px) rgba(0, 0, 0, 0.18),
-    0 1px 3px rgba(0, 0, 0, 0.08);
-  border: 1px solid color-mix(in srgb, var(--skin-border) calc(var(--opacity) * 100%), transparent);
+  border-radius: clamp(16px, 5vw, 26px);
+  background:
+    linear-gradient(128deg, color-mix(in srgb, var(--glass-highlight) 46%, transparent), transparent 34%),
+    color-mix(in srgb, var(--skin-card) var(--glass-strength), transparent);
+  box-shadow:
+    0 2px 6px color-mix(in srgb, var(--glass-shadow) 72%, transparent),
+    inset 0 1px 0 color-mix(in srgb, #ffffff 68%, transparent),
+    inset 0 -1px 0 color-mix(in srgb, var(--skin-border) 38%, transparent);
+  border: 1px solid color-mix(in srgb, var(--glass-stroke) calc(var(--opacity) * 100%), transparent);
+  backdrop-filter: blur(22px) saturate(1.22);
+  -webkit-backdrop-filter: blur(22px) saturate(1.22);
   overflow: hidden;
   display: flex;
   flex-direction: column;
 }
 
+.card::before,
+.card::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 50%;
+  filter: blur(18px);
+}
+
+.card::before {
+  width: 54%;
+  height: 72%;
+  top: -38%;
+  left: -22%;
+  background: color-mix(in srgb, var(--skin-accent) 24%, transparent);
+}
+
+.card::after {
+  width: 58%;
+  height: 66%;
+  right: -24%;
+  bottom: -42%;
+  opacity: 0.42;
+  background: color-mix(in srgb, var(--skin-bg) 72%, var(--skin-accent));
+}
+
 .card-body {
+  position: relative;
+  z-index: 1;
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: clamp(10px, 3.5vw, 22px);
+  padding: clamp(11px, 3.4vw, 21px);
   min-height: 0;
 }
 
@@ -306,14 +343,20 @@ function onDoubleClick() {
   border-radius: 50%;
   flex-shrink: 0;
   background: var(--dot-busy);
+  box-shadow: 0 0 0 3px color-mix(in srgb, currentColor 12%, transparent);
 }
-.dot.ok { background: var(--dot-ok); }
-.dot.bad { background: var(--dot-bad); }
-.dot.busy { background: var(--dot-busy); }
+.dot.ok { background: var(--dot-ok); color: var(--dot-ok); }
+.dot.bad { background: var(--dot-bad); color: var(--dot-bad); }
+.dot.busy { background: var(--dot-busy); color: var(--dot-busy); animation: status-breathe 1.2s ease-in-out infinite; }
+
+@keyframes status-breathe {
+  50% { transform: scale(1.16); opacity: 0.62; }
+}
 
 .title {
   font-size: clamp(10px, 3.4vw, 20px);
-  font-weight: 600;
+  font-weight: 700;
+  letter-spacing: -0.01em;
   color: var(--skin-text);
   flex: 1;
   white-space: nowrap;
@@ -323,7 +366,7 @@ function onDoubleClick() {
 
 .actions {
   display: flex;
-  gap: clamp(2px, 0.9vw, 6px);
+  gap: clamp(2px, 0.8vw, 5px);
 }
 
 .btn {
@@ -332,15 +375,17 @@ function onDoubleClick() {
   display: flex;
   align-items: center;
   justify-content: center;
-  border: none;
-  background: transparent;
-  border-radius: clamp(6px, 2vw, 10px);
-  color: var(--skin-subtext);
-  transition: background 0.15s, color 0.15s;
+  border: 1px solid transparent;
+  background: color-mix(in srgb, var(--skin-card) 24%, transparent);
+  border-radius: clamp(6px, 2vw, 9px);
+  color: color-mix(in srgb, var(--skin-text) 76%, var(--skin-subtext));
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 .btn:hover {
-  background: color-mix(in srgb, var(--skin-subtext) 18%, transparent);
+  background: color-mix(in srgb, var(--skin-card) 48%, transparent);
+  border-color: color-mix(in srgb, var(--glass-stroke) 66%, transparent);
   color: var(--skin-text);
+  transform: translateY(-1px);
 }
 .btn-close:hover {
   background: color-mix(in srgb, var(--dot-bad) 22%, transparent);
@@ -351,7 +396,7 @@ function onDoubleClick() {
   height: clamp(13px, 4.5vw, 24px);
   fill: none;
   stroke: currentColor;
-  stroke-width: 2;
+  stroke-width: 2.15;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
@@ -360,14 +405,15 @@ function onDoubleClick() {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: clamp(6px, 2vw, 16px);
+  gap: clamp(7px, 2vw, 14px);
   flex: 1;
   min-height: 0;
 }
 
 .balance {
   font-size: clamp(18px, 9vw, 56px);
-  font-weight: 700;
+  font-weight: 760;
+  letter-spacing: -0.045em;
   color: var(--skin-accent);
   line-height: 1;
   white-space: nowrap;
@@ -375,8 +421,8 @@ function onDoubleClick() {
 
 .delta {
   font-size: clamp(11px, 3.6vw, 20px);
-  font-weight: 600;
-  color: var(--skin-subtext);
+  font-weight: 650;
+  color: color-mix(in srgb, var(--skin-text) 68%, var(--skin-subtext));
   white-space: nowrap;
 }
 .delta.up { color: var(--dot-ok); }
@@ -384,8 +430,9 @@ function onDoubleClick() {
 
 .sub {
   font-size: clamp(10px, 3.4vw, 18px);
-  color: var(--skin-subtext);
+  color: color-mix(in srgb, var(--skin-text) 72%, var(--skin-subtext));
   text-align: center;
+  font-weight: 620;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -394,9 +441,10 @@ function onDoubleClick() {
 
 .detail {
   font-size: clamp(10px, 3.4vw, 18px);
-  color: var(--skin-subtext);
+  color: color-mix(in srgb, var(--skin-text) 64%, var(--skin-subtext));
+  font-weight: 540;
   text-align: center;
-  margin-top: clamp(2px, 0.6vw, 4px);
+  margin-top: clamp(3px, 0.8vw, 6px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -405,8 +453,11 @@ function onDoubleClick() {
 
 .foot {
   font-size: clamp(9px, 3vw, 15px);
-  color: color-mix(in srgb, var(--skin-subtext) 75%, transparent);
-  margin-top: clamp(6px, 2vw, 12px);
+  color: color-mix(in srgb, var(--skin-text) 56%, var(--skin-subtext));
+  font-weight: 540;
+  margin-top: clamp(7px, 2vw, 12px);
+  padding-top: clamp(6px, 1.8vw, 10px);
+  border-top: 1px solid color-mix(in srgb, var(--skin-border) 50%, transparent);
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
@@ -427,11 +478,16 @@ function onDoubleClick() {
 
 .go-settings {
   padding: clamp(6px, 2vw, 12px) clamp(16px, 5vw, 28px);
-  border: none;
+  border: 1px solid color-mix(in srgb, #ffffff 48%, transparent);
   border-radius: clamp(7px, 2.4vw, 12px);
   background: var(--skin-accent);
   color: #fff;
   font-size: clamp(12px, 3.6vw, 18px);
+}
+
+.go-settings:hover {
+  filter: brightness(1.06);
+  transform: translateY(-1px);
 }
 
 .resize-handle {
@@ -441,5 +497,14 @@ function onDoubleClick() {
   width: 14px;
   height: 14px;
   cursor: nwse-resize;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dot.busy,
+  .btn,
+  .go-settings {
+    animation: none;
+    transition: none;
+  }
 }
 </style>

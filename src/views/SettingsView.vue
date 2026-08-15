@@ -10,6 +10,7 @@ import {
   type SkinColors,
 } from "../skins";
 import { enable, disable, isEnabled } from "@tauri-apps/plugin-autostart";
+import { applyGlassWindowEffect } from "../lib/windowEffects";
 
 const config = ref<api.Config | null>(null);
 const apiKey = ref("");
@@ -73,7 +74,10 @@ async function init() {
   applyCurrentSkin();
 }
 
-onMounted(init);
+onMounted(() => {
+  void applyGlassWindowEffect();
+  init();
+});
 
 function selectSkin(id: string) {
   skinId.value = id;
@@ -127,7 +131,14 @@ async function clearHistory() {
 
 <template>
   <div class="settings">
-    <h1>设置</h1>
+    <main class="settings-shell">
+      <header class="settings-header">
+        <div>
+          <h1>偏好设置</h1>
+          <p>配置查询节奏与悬浮窗外观</p>
+        </div>
+        <div class="live-indicator"><span></span>实时预览</div>
+      </header>
 
     <section>
       <label class="label">DeepSeek API Key</label>
@@ -217,34 +228,92 @@ async function clearHistory() {
       <button class="ghost danger" :disabled="clearing" @click="clearHistory">清空历史记录</button>
     </section>
 
-    <div class="footer">
-      <button class="save" @click="save">保存</button>
-      <span v-if="saved" class="saved">已保存 ✓</span>
-    </div>
+      <div class="footer">
+        <button class="save" @click="save">保存更改</button>
+        <span v-if="saved" class="saved">已保存</span>
+      </div>
+    </main>
   </div>
 </template>
 
 <style scoped>
 .settings {
-  max-width: 520px;
-  margin: 0 auto;
-  padding: 24px;
+  min-height: 100%;
+  padding: 18px;
   color: var(--skin-text);
+  background:
+    radial-gradient(circle at 0% 0%, color-mix(in srgb, var(--skin-accent) 22%, transparent), transparent 31%),
+    radial-gradient(circle at 100% 100%, color-mix(in srgb, var(--skin-bg) 70%, var(--skin-accent)), transparent 46%),
+    transparent;
+}
+
+.settings-shell {
+  max-width: 620px;
+  min-height: calc(100vh - 36px);
+  margin: 0 auto;
+  padding: 22px 24px 18px;
+  border: 1px solid color-mix(in srgb, var(--glass-stroke) 84%, transparent);
+  border-radius: 20px;
+  background:
+    linear-gradient(135deg, color-mix(in srgb, #ffffff 33%, transparent), transparent 27%),
+    var(--glass-fill-strong);
+  box-shadow: 0 18px 48px var(--glass-shadow), inset 0 1px 0 color-mix(in srgb, #ffffff 68%, transparent);
+  backdrop-filter: blur(22px) saturate(1.16);
+  -webkit-backdrop-filter: blur(22px) saturate(1.16);
+}
+
+.settings-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 19px;
+  border-bottom: 1px solid color-mix(in srgb, var(--skin-border) 58%, transparent);
 }
 
 h1 {
-  font-size: 20px;
-  margin-bottom: 20px;
+  font-size: 21px;
+  line-height: 1.15;
+  letter-spacing: -0.03em;
+  font-weight: 760;
+}
+
+.settings-header p {
+  margin-top: 5px;
+  color: var(--skin-subtext);
+  font-size: 12px;
+}
+
+.live-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 9px;
+  border: 1px solid color-mix(in srgb, var(--skin-border) 66%, transparent);
+  border-radius: 999px;
+  color: var(--skin-subtext);
+  background: color-mix(in srgb, var(--skin-card) 24%, transparent);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.live-indicator span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--dot-ok);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--dot-ok) 14%, transparent);
 }
 
 section {
-  margin-bottom: 22px;
+  padding: 19px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--skin-border) 45%, transparent);
 }
 
 .label {
   display: block;
   font-size: 13px;
-  font-weight: 600;
+  font-weight: 680;
   margin-bottom: 8px;
   color: var(--skin-text);
 }
@@ -252,15 +321,16 @@ section {
 .input {
   flex: 1;
   padding: 8px 12px;
-  border: 1px solid var(--skin-border);
-  border-radius: 8px;
-  background: var(--skin-card);
+  border: 1px solid color-mix(in srgb, var(--skin-border) 72%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--skin-card) 42%, transparent);
   color: var(--skin-text);
   font-size: 13px;
   outline: none;
 }
 .input:focus {
   border-color: var(--skin-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--skin-accent) 13%, transparent);
 }
 
 .key-row {
@@ -283,14 +353,14 @@ section {
 .chip {
   padding: 6px 12px;
   font-size: 12px;
-  border: 1px solid var(--skin-border);
-  background: var(--skin-card);
+  border: 1px solid color-mix(in srgb, var(--skin-border) 68%, transparent);
+  background: color-mix(in srgb, var(--skin-card) 28%, transparent);
   color: var(--skin-text);
-  border-radius: 8px;
+  border-radius: 9px;
   cursor: pointer;
 }
 .chip.active {
-  background: var(--skin-accent);
+  background: color-mix(in srgb, var(--skin-accent) 88%, var(--skin-card));
   border-color: var(--skin-accent);
   color: #fff;
 }
@@ -311,14 +381,14 @@ section {
   align-items: center;
   gap: 6px;
   padding: 6px 12px 6px 8px;
-  border: 1px solid var(--skin-border);
-  background: var(--skin-card);
-  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--skin-border) 68%, transparent);
+  background: color-mix(in srgb, var(--skin-card) 24%, transparent);
+  border-radius: 10px;
   cursor: pointer;
 }
 .skin.active {
   border-color: var(--skin-accent);
-  box-shadow: 0 0 0 1px var(--skin-accent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--skin-accent) 18%, transparent);
 }
 
 .skin-swatch {
@@ -374,7 +444,7 @@ section {
 .slider-round {
   width: 40px;
   height: 22px;
-  background: var(--skin-border);
+  background: color-mix(in srgb, var(--skin-border) 82%, transparent);
   border-radius: 11px;
   position: relative;
   transition: background 0.2s;
@@ -403,8 +473,8 @@ section {
 
 .ghost {
   padding: 6px 14px;
-  border: 1px solid var(--skin-border);
-  background: var(--skin-card);
+  border: 1px solid color-mix(in srgb, var(--skin-border) 70%, transparent);
+  background: color-mix(in srgb, var(--skin-card) 30%, transparent);
   color: var(--skin-text);
   border-radius: 8px;
   font-size: 12px;
@@ -419,22 +489,30 @@ section {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-top: 28px;
+  padding-top: 20px;
 }
 
 .save {
-  padding: 9px 28px;
-  border: none;
-  border-radius: 8px;
-  background: var(--skin-accent);
+  padding: 10px 20px;
+  border: 1px solid color-mix(in srgb, #ffffff 48%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--skin-accent) 91%, var(--skin-card));
   color: #fff;
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+  box-shadow: 0 8px 18px color-mix(in srgb, var(--skin-accent) 24%, transparent);
 }
 
 .saved {
   font-size: 13px;
   color: var(--dot-ok);
+}
+
+@media (max-width: 520px) {
+  .settings { padding: 10px; }
+  .settings-shell { min-height: calc(100vh - 20px); padding: 18px; border-radius: 16px; }
+  .settings-header { align-items: center; }
+  .live-indicator { display: none; }
 }
 </style>

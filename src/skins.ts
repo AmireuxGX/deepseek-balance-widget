@@ -86,5 +86,9 @@ export function applySkin(skin: Skin) {
 }
 
 export function applyOpacity(opacity: number) {
-  document.documentElement.style.setProperty("--opacity", String(opacity));
+  const safeOpacity = Math.min(1, Math.max(0.4, opacity));
+  const readableGlassStrength = Math.round(52 + safeOpacity * 32);
+  const root = document.documentElement;
+  root.style.setProperty("--opacity", String(safeOpacity));
+  root.style.setProperty("--glass-strength", `${readableGlassStrength}%`);
 }

@@ -1,6 +1,6 @@
 [package]
 name = "deepseek-balance-widget"
-version = "0.2.0"
+version = "0.3.0"
 description = "DeepSeek 余额悬浮窗（Tauri 版）"
 authors = ["DeepSeekBalanceWidget"]
 edition = "2021"

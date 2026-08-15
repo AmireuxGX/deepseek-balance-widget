@@ -9,6 +9,13 @@
   --dot-ok: #10b981;
   --dot-bad: #ef4444;
   --dot-busy: #f59e0b;
+  --glass-strength: 81%;
+  --glass-fill: color-mix(in srgb, var(--skin-card) 54%, transparent);
+  --glass-fill-strong: color-mix(in srgb, var(--skin-card) 76%, transparent);
+  --glass-stroke: color-mix(in srgb, #ffffff 68%, var(--skin-border));
+  --glass-highlight: rgba(255, 255, 255, 0.72);
+  --glass-shadow: color-mix(in srgb, var(--skin-text) 23%, transparent);
+  --surface-wash: color-mix(in srgb, var(--skin-bg) 60%, transparent);
 }
 
 * {
@@ -35,6 +42,7 @@ body {
   user-select: none;
   overflow: hidden;
   color: var(--skin-text);
+  -webkit-tap-highlight-color: transparent;
 }
 
 /* 主悬浮窗：透明背景，圆角由卡片自身实现 */
@@ -45,13 +53,20 @@ body.app-main {
 /* 曲线 / 设置窗口：不透明背景 */
 body.app-chart,
 body.app-settings {
-  background: var(--skin-bg);
+  background: transparent;
   overflow: auto;
 }
 
 button {
   font-family: inherit;
   cursor: pointer;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--skin-accent) 72%, #ffffff);
+  outline-offset: 2px;
 }
 
 input,
@@ -65,6 +80,10 @@ select {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--skin-border);
+  background: color-mix(in srgb, var(--skin-subtext) 28%, transparent);
   border-radius: 5px;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--skin-accent) 24%, transparent);
 }
