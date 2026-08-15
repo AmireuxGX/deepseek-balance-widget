@@ -1,0 +1,24 @@
+[package]
+name = "deepseek-balance-widget"
+version = "0.2.0"
+description = "DeepSeek 余额悬浮窗（Tauri 版）"
+authors = ["DeepSeekBalanceWidget"]
+edition = "2021"
+
+[lib]
+name = "deepseek_balance_widget_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+tauri = { version = "2", features = ["tray-icon", "image-png"] }
+tauri-plugin-single-instance = "2"
+tauri-plugin-autostart = "2"
+reqwest = { version = "0.12", features = ["blocking", "json"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[features]
+custom-protocol = ["tauri/custom-protocol"]

@@ -1,0 +1,70 @@
+:root {
+  --skin-bg: #eef2f8;
+  --skin-card: #ffffff;
+  --skin-accent: #4d6bfe;
+  --skin-text: #1f2937;
+  --skin-subtext: #5b6b84;
+  --skin-border: #d8e4f2;
+  --opacity: 0.92;
+  --dot-ok: #10b981;
+  --dot-bad: #ef4444;
+  --dot-busy: #f59e0b;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+}
+
+html {
+  background: transparent;
+}
+
+body {
+  background: transparent;
+  font-family: "Segoe UI", "Microsoft YaHei", "PingFang SC", -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  user-select: none;
+  overflow: hidden;
+  color: var(--skin-text);
+}
+
+/* 主悬浮窗：透明背景，圆角由卡片自身实现 */
+body.app-main {
+  background: transparent;
+}
+
+/* 曲线 / 设置窗口：不透明背景 */
+body.app-chart,
+body.app-settings {
+  background: var(--skin-bg);
+  overflow: auto;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+select {
+  font-family: inherit;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--skin-border);
+  border-radius: 5px;
+}
