@@ -6,9 +6,9 @@
 
 基于 **Tauri 2 + Vue 3 + ECharts** 构建的半透明置顶悬浮窗，定时查询 DeepSeek API 余额，用实时曲线记录每一分钱的流逝。
 
-[![Release](https://img.shields.io/github/v/release/你的用户名/deepseek-balance-widget?style=flat-square)](https://github.com/你的用户名/deepseek-balance-widget/releases/latest)
+[![Release](https://img.shields.io/github/v/release/AmireuxGX/deepseek-balance-widget?style=flat-square)](https://github.com/AmireuxGX/deepseek-balance-widget/releases/latest)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-[![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-blue.svg?style=flat-square)](https://github.com/你的用户名/deepseek-balance-widget/releases/latest)
+[![Platform](https://img.shields.io/badge/Platform-Windows%2010%2F11-blue.svg?style=flat-square)](https://github.com/AmireuxGX/deepseek-balance-widget/releases/latest)
 [![Tauri](https://img.shields.io/badge/Tauri-2-24C8D8?style=flat-square)](https://tauri.app)
 
 </div>
@@ -32,7 +32,7 @@
 
 ## ⬇️ 下载安装
 
-前往 **[Releases](https://github.com/你的用户名/deepseek-balance-widget/releases/latest)** 页面下载：
+前往 **[Releases](https://github.com/AmireuxGX/deepseek-balance-widget/releases/latest)** 页面下载：
 
 | 文件 | 说明 |
 | --- | --- |
